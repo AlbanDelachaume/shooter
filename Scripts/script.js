@@ -11,9 +11,18 @@ shooter.$score = shooter.$container.querySelector('.score .value')
 shooter.score = 0
 shooter.secondsLeft = 0
 
+shooter.$bestScore = shooter.$container.querySelector('.best-score .value')
+shooter.bestScore = window.localStorage.getItem('bestScore')
+if(shooter.bestScore === null)
+{
+    shooter.bestScore = 0
+}
+shooter.bestScore = parseInt(shooter.bestScore)
+shooter.$bestScore.textContent = shooter.bestScore
+
 shooter.sounds = {}
-shooter.sounds.ding = new Audio('ding.mp3')
-shooter.sounds.finish = new Audio('finish.mp3')
+shooter.sounds.ding = new Audio('Audio/ding.mp3')
+shooter.sounds.finish = new Audio('Audio/finish.mp3')
 
 shooter.$start.addEventListener('click', () =>
 {
@@ -25,11 +34,31 @@ shooter.$start.addEventListener('click', () =>
  */
 shooter.start = () =>
 {
-    shooter.$container.classList.replace('step-start', 'step-game')
+    shooter.$container.classList.remove('step-start')
+    shooter.$container.classList.remove('step-end')
+    shooter.$container.classList.add('step-game')
 
-    shooter.secondsLeft = 12
+    shooter.secondsLeft = 4
+
+    shooter.score = 0
+    shooter.$score.textContent = shooter.score
 
     shooter.tick()
+}
+
+shooter.end = () =>
+{
+    shooter.$container.classList.remove('step-game')
+    shooter.$container.classList.add('step-end')
+
+    shooter.sounds.finish.play()
+
+    if(shooter.score > shooter.bestScore)
+    {
+        shooter.bestScore = shooter.score
+        window.localStorage.setItem('bestScore', shooter.bestScore)
+        shooter.$bestScore.textContent = shooter.bestScore
+    }
 }
 
 shooter.tick = () =>
@@ -38,11 +67,19 @@ shooter.tick = () =>
 
     if(shooter.secondsLeft === 0)
     {
-        console.log('end')
+        shooter.end()
     }
     else
     {
-        console.log('tick')
+        if(shooter.secondsLeft > 9)
+        {
+            shooter.$timer.textContent = `00:${shooter.secondsLeft}`
+        }
+        else
+        {
+            shooter.$timer.textContent = `00:0${shooter.secondsLeft}`
+        }
+
         window.setTimeout(shooter.tick, 1000)
     }
 }
